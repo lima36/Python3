@@ -191,13 +191,16 @@ class IdlePlus(tk.Frame):
         files = utils.listdir(self.myFoler_selected)
         print(files)
 
-        self.textView2.delete("1.0", tk.END)
+        self.textView2.delete("1.0", "end")
 
         for f in files:
             print(f)
-            self.textView2.insert("end", f)
-            info = logparse.analysis_robot(f)
-            self.textView2.insert("end", info)
+            self.textView2.insert("end", "====================================" + '\n')
+            self.textView2.insert("end", f+'\n')
+
+            info_list = logparse.analysis_robot(f)
+            for info in info_list:
+                self.textView2.insert("end", info)
 
     def parseElevator(self):
         self.myFoler_selected = tk.filedialog.askdirectory(parent=self.master, initialdir=".",
@@ -209,9 +212,12 @@ class IdlePlus(tk.Frame):
 
         for f in files:
             print(f)
-            self.textView3.insert("end", f)
-            info = logparse.analysis_elevator(f)
-            self.textView3.insert("end", info)
+            self.textView3.insert("end", "====================================" + '\n')
+            self.textView3.insert("end", f+'\n')
+
+            info_list = logparse.analysis_elevator(f)
+            for info in info_list:
+                self.textView3.insert("end", info)
         pass
 
 

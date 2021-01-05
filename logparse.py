@@ -6,7 +6,8 @@ regex = r'\[(\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{6})\] <(\w*)> \[(.*)\](.*)'
 action = r'\[(\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{6})\] <(\w*)> \[(ExtInterfaceService)\]( Current Action Status .*)'
 mcu_info = r'\[(\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{6})\] <(\w*)> \[(w_)\],(.*)'
 position = r'\[(\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{6})\] <(\w*)> \[(slam_)\],(.*)'
-mov2goal = r'\[(\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{6})\] <(\w*)> \[(ExtInterfaceService)\] Action Msg \[ ID\(eMove2Goal\)'
+mov2goal = r'\[(\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{6})\] <(\w*)> \[(ExtInterfaceService)\] Action Msg \[ ID\(.*\)'
+robot_state = r'\[(\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{6})\] <(\w*)> \[(navicore::component::ActionState_)'
 booting = r'\[(\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{6})\] <(\w*)> \[mmedia_\] load micom\.yml.*'
 elevator = r'elevator'
 #robot.yml
@@ -119,13 +120,16 @@ def find_move2goal(line):
     if matchobj is not None:
         pass#print(matchobj.group(1), matchobj.group(2))
 
-def count_booting(line):
+def count_booting(inFile):
+
     pass
+
 
 def analysis_robot(inFile):
     print("analysis_robot:"+inFile)
     info = []
     with open(inFile, 'r') as logFile:
+        prevlog = "analysis_robot"
         for line in logFile:
             line = ansi_escape.sub('', line)
             # matchobj = re.search(mov2goal, line)
@@ -134,19 +138,38 @@ def analysis_robot(inFile):
                 find_move2goal(line)
                 print(line)
                 info.append(line)
+            elif re.search(robot_state, line) is not None:
+                print(line)
+                if "ActionState_Run] Info - RemainDistM" in prevlog:
+                    prevlog = line
+                    continue
+                prevlog = line
+                info.append(line)
             elif re.search(booting, line) is not None:
                 print(line)
                 info.append(line)
     return info
 
+
 def analysis_elevator(inFile):
+    info = []
+    with open(inFile, 'r') as logFile:
+        word = ["eSTATUS_PATH_FAIL_TARGET_BLOCKED", "offsetResult", "eOutOfElevator", "eInToElevator", "final height(weighted)"]
+        for line in logFile:
+            line = ansi_escape.sub('', line)
+            if re.search("Elevator|EIN|TM|Action Msg", line) is not None:
+                if any(s in line for s in word):
+                    info.append(line)
+
+
+    return info
+
+def analysis_elevator2(inFile):
     info = []
     with open(inFile, 'r') as logFile:
         for line in logFile:
             line = ansi_escape.sub('', line)
-            # matchobj = re.search(mov2goal, line)
-            # print(line)
-            if re.search(elevator, line) is not None:
-                print(line)
+            if re.search("elevator", line) is not None:
+                # print(line)
                 info.append(line)
     return info
