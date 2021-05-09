@@ -113,7 +113,7 @@ def search_and_download(search_term:str,driver_path:str,target_path='./images',n
 # search_box = wd.find_element_by_css_selector('input.gLFyf')
 # search_box.send_keys('Dogs')
 
-search_term = "모텔"
+search_term = "dogs"
 search_and_download(search_term=search_term, driver_path=DRIVER_PATH, number_images=10)
 
 # wd.quit()
